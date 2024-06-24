@@ -7,8 +7,11 @@
   <maintainer email="tzhang@g.harvard.edu">naliseas</maintainer>
   <license>TODO: License declaration</license>
 
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
   <exec_depend>rclpy</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>ucb_interfaces</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
@@ -17,5 +20,6 @@
 
   <export>
     <build_type>ament_python</build_type>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>
