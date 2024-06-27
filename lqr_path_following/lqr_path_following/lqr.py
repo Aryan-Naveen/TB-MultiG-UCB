@@ -49,7 +49,8 @@ COEF_NAMES = ['C1','C0','k','b']
 def get_control_action(waypoints,curr_x):
     if len(waypoints)==0:
         return []
-        
+    
+    waypoints = np.vstack([curr_x[:2], waypoints])
     planning_dt = 0.1
 
     Q = np.array([[10,0,0],[0,10,0],[0,0,1]])
@@ -90,7 +91,7 @@ class agent_node(Node):
         
         self.reward_collection_timer = self.create_timer(self.reward_sleep_time,self.reward_callback)
 
-        self.motion_sleep_time = 0.1
+        self.motion_sleep_time = 1e-1
 
         self.motion_timer = self.create_timer(self.motion_sleep_time,self.motion_callback)
 
@@ -99,7 +100,7 @@ class agent_node(Node):
         """
             
         # Temporary hard-coded waypoints used in devel.	
-        self.waypoints = np.array([[-1.,-2], [-2, -2]])
+        self.waypoints = np.array([[-2.201, -0.401], [-2.201, -0.400]])
         self.waypoint_pub = self.create_publisher(Float32MultiArray,'waypoints',qos)
     
         """
@@ -223,7 +224,8 @@ class agent_node(Node):
 
                 loc = self.get_my_loc()
                 yaw = self.get_my_yaw()
-
+                print("=====================")
+                print(loc)
                 if len(self.waypoints)==0:
                     self.get_logger().info("Running out of waypoints.")
 
@@ -231,6 +233,7 @@ class agent_node(Node):
                     curr_x = np.array([loc[0],loc[1],yaw])		
                     wp_proj = free_space.project_point(self.waypoints)
                     self.control_actions = deque(get_control_action(wp_proj,curr_x))
+                    print(wp_proj)
                     waypoint_out = Float32MultiArray()
                     waypoint_out.data = list(wp_proj.flatten())
                     self.waypoint_pub.publish(waypoint_out)
@@ -260,6 +263,7 @@ class agent_node(Node):
 
         else:
             self.vel_pub.publish(stop_twist())
+
             self.motion_reset()
         
         

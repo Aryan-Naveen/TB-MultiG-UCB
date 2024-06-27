@@ -1,7 +1,7 @@
 import numpy as np
 
-BURGER_MAX_LIN_VEL = 0.22 * 0.4
-BURGER_MAX_ANG_VEL = 2.84 * 0.4
+BURGER_MAX_LIN_VEL = 0.22 
+BURGER_MAX_ANG_VEL = 2.84 
 
 def unscaled_spline_motion(waypoints,poly_order, space_dim,n_output):
     
@@ -155,9 +155,11 @@ def LQR_for_motion_mimicry(waypoints,planning_dt,x_0,Q,R):
 
     # # Get rid of the waypoints that are left-behind.
     waypoints = waypoints[np.argmin(np.linalg.norm(waypoints-x_0[:2],axis=1)):]
+    
 
     p,theta,v,omega,dsdt=scaled_spline_motion(waypoints,planning_dt)
     
+    print(len(p))
     if len(p)==0 or len(theta)==0:
         return [],[],[]
 
@@ -200,11 +202,14 @@ def LQR_for_motion_mimicry(waypoints,planning_dt,x_0,Q,R):
     dx_0 = x_0-ref_x[0]
     dx_0[-1]=regularize_angle(dx_0[-1])
     
+    print("=================== PRINTING REF U==============================")
+    print(ref_u)
+    print("=================== PRINTING REF X==============================")
+    print(ref_x)
     # Data containers
     xhat=np.zeros(ref_x.shape)
     uhat = np.zeros(ref_u.shape)
     dx=dx_0
-    
     for i in range(n_ref_motion-1):     
         dx[-1]=regularize_angle(dx[-1])
         x = ref_x[i] + dx 
@@ -215,4 +220,5 @@ def LQR_for_motion_mimicry(waypoints,planning_dt,x_0,Q,R):
         uhat[i,:]=(ref_u[i]+du)
         
         dx = As[i].dot(dx)+Bs[i].dot(du)
+
     return uhat,xhat,p

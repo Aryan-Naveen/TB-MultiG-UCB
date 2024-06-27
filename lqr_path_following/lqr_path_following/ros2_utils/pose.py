@@ -137,9 +137,13 @@ def turtlebot_twist(v,omega):
     vel_msg=Twist()
     # Linear velocity in the x-axis.
     
+
     vel_msg.linear.x = constrain(v,-BURGER_MAX_LIN_VEL,BURGER_MAX_LIN_VEL)
     vel_msg.linear.y = 0.0
     vel_msg.linear.z = 0.0
+
+    print(f"WHAT WE ARE PUBLISHING {vel_msg.linear.x}")
+
 
     # Angular velocity in the z-axis.
     vel_msg.angular.x = 0.0
