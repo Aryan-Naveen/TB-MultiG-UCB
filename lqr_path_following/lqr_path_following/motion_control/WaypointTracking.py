@@ -1,11 +1,13 @@
 import numpy as np
 
-BURGER_MAX_LIN_VEL = 0.22 
-BURGER_MAX_ANG_VEL = 2.84 
+BURGER_MAX_LIN_VEL = 0.22*0.4 
+BURGER_MAX_ANG_VEL = 2.84*0.4 
+
 
 def unscaled_spline_motion(waypoints,poly_order, space_dim,n_output):
     
-    # Local Helper Functions
+
+
     def fit_spatial_polynomial(waypoints,poly_order, space_dim):
         """
             Fit a spatial polynomial p(s)-> R^space_dim, s in 0~1, to fit the waypoints.
@@ -26,9 +28,12 @@ def unscaled_spline_motion(waypoints,poly_order, space_dim,n_output):
         # The two formulas below are equivalent if S is full rank.
     #     poly_coefs= np.linalg.inv(S.dot(S.T))).dot(waypoints)
         poly_coefs = np.linalg.pinv(S).dot(waypoints)
+        # poly_coefs_x = np.polyfit(s, waypoints[:,0], poly_order)[::-1]
+        # poly_coefs_y = np.polyfit(s, waypoints[:,1], poly_order)[::-1]
+        # return np.vstack([poly_coefs_x,poly_coefs_y]).T
         return poly_coefs
 
-    # A debug-purpose function.
+        # A debug-purpose function.
     # def polynomial(poly_coefs,x):
     #     '''
     #         Evaluate the value of the polynomial specified by poly_coefs at locations x.
@@ -51,6 +56,10 @@ def unscaled_spline_motion(waypoints,poly_order, space_dim,n_output):
     if n_output <=1:
         return np.array([]),np.array([]),np.array([]),np.array([]),np.array([]),np.array([])
     coef = fit_spatial_polynomial(waypoints,poly_order, space_dim)
+
+    print("===========================")
+    print(coef)
+    print("===========================")
     s = np.array([i/(n_output-1) for i in range(n_output)])
     S = np.vstack([np.power(s,k) for k in range(poly_order+1)])
     S=S.T
@@ -83,7 +92,7 @@ def unscaled_spline_motion(waypoints,poly_order, space_dim,n_output):
     omega = (pDDot[:,1]*pDot[:,0]-pDDot[:,0]*pDot[:,1])/np.power(v,2)
     # The angular velocity, rotating counter-clockwise as positive. shape=(n_waypoints,)
     return p,pDot,pDDot,theta,v,omega
-def scaled_spline_motion(waypoints,planning_dt,poly_order=3,space_dim=2):
+def scaled_spline_motion(waypoints,planning_dt,poly_order=2,space_dim=2):
     """
         The synchronized max uniform speed scheduling.
         space_dim: the dimension of space. Normally 2 or 3.
@@ -98,6 +107,8 @@ def scaled_spline_motion(waypoints,planning_dt,poly_order=3,space_dim=2):
         return [],[],[],[],[]
     N=np.max([100,4*n_waypoints]) 
     # Heuristic choice. The number of grid points to be used in grid_search for determining nstar.
+
+    print(N)
     p,pDot,pDDot,theta,v,omega = unscaled_spline_motion(waypoints,poly_order, space_dim,N)
     
     
@@ -105,7 +116,7 @@ def scaled_spline_motion(waypoints,planning_dt,poly_order=3,space_dim=2):
     m = np.min([Vm/np.abs(v),Om/np.abs(omega)],axis=0)
     mstar=np.min(m)
     nstar = int(np.ceil(1/(mstar*planning_dt)))
-
+    print(nstar)
     
     dsdt =  1/(nstar*planning_dt)
     p,pDot,pDDot,theta,v,omega = unscaled_spline_motion(waypoints,poly_order, space_dim,nstar)
@@ -113,7 +124,7 @@ def scaled_spline_motion(waypoints,planning_dt,poly_order=3,space_dim=2):
     v*=dsdt
     omega*=dsdt
 #   dsdt is the scaling factor to be multiplied on v and omega, so that they do not exceed the maximal velocity limit.
-    
+        
     
     return p,theta,v,omega,dsdt
 def LQR(As,Bs,Qs,Rs):
@@ -155,17 +166,24 @@ def LQR_for_motion_mimicry(waypoints,planning_dt,x_0,Q,R):
 
     # # Get rid of the waypoints that are left-behind.
     waypoints = waypoints[np.argmin(np.linalg.norm(waypoints-x_0[:2],axis=1)):]
-    
+    if np.linalg.norm(waypoints[0]-x_0[:2]) < 0.01:
+        if waypoints.shape[0]>1:
+            waypoints = waypoints[1:]
+        else:
+            return [],[],[]
 
     p,theta,v,omega,dsdt=scaled_spline_motion(waypoints,planning_dt)
     
-    print(len(p))
     if len(p)==0 or len(theta)==0:
         return [],[],[]
 
     ref_x = np.concatenate([p,theta.reshape(-1,1)],axis=1)
 
     ref_u = np.array([v,omega]).T
+    print(f"PRINTING REF U THAT HAS {ref_u.shape[0]} POINTS")
+    print(ref_u)
+
+    print(ref_x)
 
     #### Prepare for LQR Backward Pass #######
     n_state = ref_x.shape[1]
@@ -202,10 +220,6 @@ def LQR_for_motion_mimicry(waypoints,planning_dt,x_0,Q,R):
     dx_0 = x_0-ref_x[0]
     dx_0[-1]=regularize_angle(dx_0[-1])
     
-    print("=================== PRINTING REF U==============================")
-    print(ref_u)
-    print("=================== PRINTING REF X==============================")
-    print(ref_x)
     # Data containers
     xhat=np.zeros(ref_x.shape)
     uhat = np.zeros(ref_u.shape)
@@ -217,8 +231,10 @@ def LQR_for_motion_mimicry(waypoints,planning_dt,x_0,Q,R):
         xhat[i]=x
     
         du = -Ks[:,:,i].dot(dx)
+        print(du)
         uhat[i,:]=(ref_u[i]+du)
         
         dx = As[i].dot(dx)+Bs[i].dot(du)
 
+    print(uhat)
     return uhat,xhat,p

@@ -1,0 +1,52 @@
+/MobileSensor1/agent_node:
+    ros__parameters:
+      neighborhood_namespaces: 
+      - 'MobileSensor5'
+      pose_type_string: "optitrack"
+      xlims: [-3.0, 0.0]
+      ylims: [-3.0, 0.0]
+      cell_size: 0.2
+/MobileSensor2/agent_node:
+    ros__parameters:
+      neighborhood_namespaces: 
+      - 'MobileSensor5'
+      pose_type_string: "optitrack"
+      xlims: [-3.0, 0.0]
+      ylims: [-3.0, 0.0]
+      cell_size: 0.2
+/MobileSensor3/agent_node:
+    ros__parameters:
+      neighborhood_namespaces: 
+      - 'MobileSensor5'
+      pose_type_string: "optitrack"
+      xlims: [-3.0, 0.0]
+      ylims: [-3.0, 0.0]
+      cell_size: 0.2
+/MobileSensor4/agent_node:
+    ros__parameters:
+      neighborhood_namespaces: 
+      - 'MobileSensor5'
+      pose_type_string: "optitrack"
+      xlims: [-3.0, 0.0]
+      ylims: [-3.0, 0.0]
+      cell_size: 0.2
+/MobileSensor5/agent_node:
+    ros__parameters:
+      neighborhood_namespaces: 
+      - 'MobileSensor5'
+      pose_type_string: "optitrack"
+      xlims: [-3.0, 0.0]
+      ylims: [-3.0, 0.0]
+      cell_size: 0.2
+
+MAB_node:
+    ros__parameters:
+      neighborhood_namespaces: 
+      - 'MobileSensor5'
+      pose_type_string: "optitrack"
+      xlims: [-3.0, 0.0]
+      ylims: [-3.0, 0.0]
+      cell_size: 0.2
+      T: 100000
+      M: 4
+      

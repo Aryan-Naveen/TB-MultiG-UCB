@@ -11,6 +11,11 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
+# Install configuration files
+install(DIRECTORY config
+  DESTINATION share/${PROJECT_NAME}/
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
@@ -24,22 +29,28 @@ if(BUILD_TESTING)
 endif()
 
 find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 find_package(rosidl_default_generators REQUIRED)
 
 set(msg_files
-    "msg/Observation.msg"
-    "msg/Rewards.msg"
-    "msg/Trajectory.msg"
+    "msg/UCBTrajectory.msg"
+    "msg/UCBPackageNode.msg"
+    "msg/UCBAgentPackage.msg"
 )
 
 set(srv_files
-    "srv/UcbEpisode.srv"
+    "srv/UcbEpisodePackage.srv"
+)
+
+set(action_files
+    "action/UCBEpisode.action"
 )
 rosidl_generate_interfaces(${PROJECT_NAME}
     ${msg_files}
     ${srv_files}
-    DEPENDENCIES std_msgs
+    ${action_files}
+    DEPENDENCIES std_msgs geometry_msgs
 )
 ament_export_dependencies(rosidl_default_runtime)
 

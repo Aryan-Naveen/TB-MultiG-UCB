@@ -1,7 +1,8 @@
 from setuptools import find_packages, setup
 from glob import glob
 
-package_name = 'ucb'
+package_name = 'tb3_control'
+
 setup(
     name=package_name,
     version='0.0.0',
@@ -14,14 +15,14 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='naliseas',
-    maintainer_email='tzhang@g.harvard.edu',
+    maintainer='anaveen',
+    maintainer_email='aryan_naveen@college.harvard.com',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'ucb = ucb.main:main'
+            'agent = tb3_control.tb3_controller:main'            
         ],
     },
 )

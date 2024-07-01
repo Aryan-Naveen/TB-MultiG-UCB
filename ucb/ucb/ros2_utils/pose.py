@@ -4,6 +4,8 @@ from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import Pose,Twist,PoseStamped
 from turtlesim.msg import Pose as tPose
 from nav_msgs.msg import Odometry
+from ucb_interfaces.msg import UCBTrajectory
+
 
 BURGER_MAX_LIN_VEL = 0.22 
 BURGER_MAX_ANG_VEL = 2.84 
@@ -11,6 +13,21 @@ BURGER_MAX_ANG_VEL = 2.84
 
 LIN_VEL_STEP_SIZE = 0.1
 ANG_VEL_STEP_SIZE = 1
+
+def xy2traj(xy_points):
+    trajectory = UCBTrajectory()
+    for point in xy_points:
+        trajectory.poses.append(xy2Pose(point))
+    
+    return trajectory
+
+def xy2Pose(xy):
+    pose = Pose()
+    pose.position.x = xy[0]
+    pose.position.y = 0.0
+    pose.position.z = xy[1]
+    return pose
+
 
 def prompt_pose_type_string():
     platform_2_pose_types=dict()
@@ -43,6 +60,13 @@ def get_pose_type_and_topic(pose_type_string,robot_namespace):
         print('Unknown pose:[',pose_type_string,']')
         rpose_topic=''
     return pose_type_string,rpose_topic
+
+
+def ros_poses2numpy(poses):
+    waypoints = []
+    for pose in poses.poses:
+        waypoints.append(toxy(pose))
+    return np.array(waypoints)
 
 def toyaw(pose):
     if type(pose) is tPose:

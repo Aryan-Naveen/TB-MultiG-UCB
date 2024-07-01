@@ -1,0 +1,4 @@
+float32 episode_duration
+UCBTrajectory trajectory
+---
+UCBPackageNode[] rewards

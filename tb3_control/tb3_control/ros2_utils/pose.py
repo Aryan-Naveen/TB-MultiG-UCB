@@ -44,6 +44,13 @@ def get_pose_type_and_topic(pose_type_string,robot_namespace):
         rpose_topic=''
     return pose_type_string,rpose_topic
 
+
+def ros_poses2numpy(poses):
+    waypoints = []
+    for pose in poses.poses:
+        waypoints.append(toxy(pose))
+    return np.array(waypoints)
+
 def toyaw(pose):
     if type(pose) is tPose:
         return tPose2yaw(pose)
