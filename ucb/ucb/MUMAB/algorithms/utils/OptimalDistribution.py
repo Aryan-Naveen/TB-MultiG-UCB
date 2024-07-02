@@ -1,6 +1,6 @@
 import gurobipy as gp
 
-def optimal_distribution(arm_list, params, theoretical=False, minimize=False, debug=False, output_dir = None):
+def optimal_distribution(arm_list, M, theoretical=False, minimize=False, debug=False, output_dir = None):
     # Gurobi non-convex optimization finds convergence between upper and lower bound.
     # Default gap is 1e-4, this hsould be sufficient for finding the optimal allocation    
     # Documentation: https://www.gurobi.com/documentation/current/refman/mipgap2.html
@@ -12,7 +12,6 @@ def optimal_distribution(arm_list, params, theoretical=False, minimize=False, de
         If not minimize, will maximize
         If debug, will set output flag to 1 and write .lp
     """
-    M = params.M
 
     m = gp.Model("mip1")
     output_flag = 1 if debug else 0

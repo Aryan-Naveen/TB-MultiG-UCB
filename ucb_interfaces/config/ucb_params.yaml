@@ -2,51 +2,69 @@
     ros__parameters:
       neighborhood_namespaces: 
       - 'MobileSensor5'
+      - 'MobileSensor4'
+      - 'MobileSensor1'
+      - 'MobileSensor3'
       pose_type_string: "optitrack"
-      xlims: [-3.0, 0.0]
-      ylims: [-3.0, 0.0]
-      cell_size: 0.2
+      xlims: [-2.5, 0.0]
+      ylims: [-2.5, 0.0]
+      cell_size: 0.5
 /MobileSensor2/agent_node:
     ros__parameters:
       neighborhood_namespaces: 
       - 'MobileSensor5'
+      - 'MobileSensor4'
+      - 'MobileSensor1'
+      - 'MobileSensor3'
       pose_type_string: "optitrack"
-      xlims: [-3.0, 0.0]
-      ylims: [-3.0, 0.0]
-      cell_size: 0.2
+      xlims: [-2.5, 0.0]
+      ylims: [-2.5, 0.0]
+      cell_size: 0.5
 /MobileSensor3/agent_node:
     ros__parameters:
       neighborhood_namespaces: 
       - 'MobileSensor5'
+      - 'MobileSensor4'
+      - 'MobileSensor1'
+      - 'MobileSensor3'
       pose_type_string: "optitrack"
-      xlims: [-3.0, 0.0]
-      ylims: [-3.0, 0.0]
-      cell_size: 0.2
+      xlims: [-2.5, 0.0]
+      ylims: [-2.5, 0.0]
+      cell_size: 0.5
 /MobileSensor4/agent_node:
     ros__parameters:
       neighborhood_namespaces: 
       - 'MobileSensor5'
+      - 'MobileSensor4'
+      - 'MobileSensor1'
+      - 'MobileSensor3'
       pose_type_string: "optitrack"
-      xlims: [-3.0, 0.0]
-      ylims: [-3.0, 0.0]
-      cell_size: 0.2
+      xlims: [-2.5, 0.0]
+      ylims: [-2.5, 0.0]
+      cell_size: 0.5
 /MobileSensor5/agent_node:
     ros__parameters:
       neighborhood_namespaces: 
       - 'MobileSensor5'
+      - 'MobileSensor4'
+      - 'MobileSensor1'
+      - 'MobileSensor3'
       pose_type_string: "optitrack"
-      xlims: [-3.0, 0.0]
-      ylims: [-3.0, 0.0]
-      cell_size: 0.2
+      xlims: [-2.5, 0.0]
+      ylims: [-2.5, 0.0]
+      cell_size: 0.5
 
 MAB_node:
     ros__parameters:
       neighborhood_namespaces: 
       - 'MobileSensor5'
+      - 'MobileSensor4'
+      - 'MobileSensor1'
+      - 'MobileSensor3'
       pose_type_string: "optitrack"
-      xlims: [-3.0, 0.0]
-      ylims: [-3.0, 0.0]
-      cell_size: 0.2
+      xlims: [-2.5, 0.0]
+      ylims: [-2.5, 0.0]
+      cell_size: 0.5
       T: 100000
       M: 4
       

@@ -10,6 +10,7 @@ from ros2_utils.pose import get_pose_type_and_topic,toxy,toyaw
 
 from collections import deque
 
+import time
 
 class robot_listener:
 	''' Robot location and light_reading listener+data container.'''
@@ -39,9 +40,11 @@ class robot_listener:
 	
 		self.coefs = {}
 
+		self.last_update_time = time.time()
+
 
 	def get_latest_loc(self):
-		if len(self.robot_pose_stack)>0:
+		if len(self.robot_pose_stack)>0 and time.time() - self.last_update_time < 0.1:
 			return toxy(self.robot_pose_stack[-1])
 		else:
 			return None
@@ -63,6 +66,7 @@ class robot_listener:
 
 
 	def robot_pose_callback_(self,data):
+		self.last_update_time = time.time()
 		self.robot_pose_stack.append(data)
 
 	def light_callback_(self,data):

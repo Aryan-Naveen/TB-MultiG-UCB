@@ -21,7 +21,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'ucb = ucb.main:main'
+            'ucb = ucb.main:main',
+            'testes = ucb.test:main'
         ],
     },
 )

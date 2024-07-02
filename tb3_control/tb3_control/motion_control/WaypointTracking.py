@@ -126,10 +126,7 @@ class PID_controller(object):
 
         error = self.p_traj[self.curr_id] - loc
 
-        print(f"Target: {self.p_traj[self.curr_id]}")
-        print(f"ERROR: {error}")
         error_distance = np.linalg.norm(error)
-        print(f"ANGLE: {regularize_angle(math.atan2(error[1], error[0]))}")
         error_theta =  regularize_angle(regularize_angle(math.atan2(error[1], error[0])) - regularize_angle(yaw))
 
         print(error_distance, error_theta)
@@ -145,7 +142,7 @@ class PID_controller(object):
             error_theta =  regularize_angle(regularize_angle(math.atan2(error[1], error[0])) - regularize_angle(yaw))
 
 
-        if np.abs(error_theta) >= 0.01:
+        if np.abs(error_theta) >= 0.15:
             omega = self.theta_PIDs.update(error_theta, self.dt)
             v = 0.0
         else:

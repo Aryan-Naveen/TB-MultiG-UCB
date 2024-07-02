@@ -106,7 +106,7 @@ class agent_node(Node):
         Timer initialization
         """
 
-        self.reward_sleep_time = 1e-2
+        self.reward_sleep_time = 1e-1
         
         self.reward_collection_timer = self.create_timer(self.reward_sleep_time,self.reward_callback)
 
@@ -200,10 +200,12 @@ class agent_node(Node):
         return top_n_mean(np.array(readings),4)
 
     def get_my_cell(self):
-        [x, y] = self.get_my_loc()
-        xcell = int(x/self.csize)*self.csize 
-        ycell = int(y/self.csize)*self.csize
-        return (xcell, ycell)
+        loc = self.get_my_loc()
+        loc[0] = max(min(self.xlims[1],loc[0]), self.xlims[0])
+        loc[1] = max(min(self.ylims[1],loc[1]), self.ylims[0])
+        col_cell = -round(loc[0]/self.csize) 
+        row_cell = -round(loc[1]/self.csize)
+        return (row_cell, col_cell)
     
 
     def get_my_loc(self):
@@ -230,7 +232,7 @@ class agent_node(Node):
                 try:
                     assert(node not in node_intervals)
                 except:
-                    print(f"Node {node} already visited")
+                    self.get_logger().info(f"Node {node} already visited")
 
                 node_intervals[node] = [i, -1]
 
@@ -252,9 +254,10 @@ class agent_node(Node):
         """ 
                 Collect rewards 
         """
-        if self.ENABLED:
+        if self.ENABLED and self.get_my_loc() is not None:
             self.node_list.append(self.get_my_cell())
             self.reward_list.append(self.get_my_readings())			            
+            # self.get_logger().info(f"Current Cell --> {self.get_my_cell()} && Current Readings --> {self.reward_list[-1]}")
         else:
             pass
     

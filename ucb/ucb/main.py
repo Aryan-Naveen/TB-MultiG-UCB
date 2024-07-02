@@ -15,6 +15,7 @@ from .ros2_utils.robot_publisher import robot_publisher
 import time
 
 
+
 class MAB_node(Node):
     def __init__(self):
         super().__init__(node_name = 'MAB_node')
@@ -47,8 +48,8 @@ class MAB_node(Node):
         self.T = self.get_parameter('T').get_parameter_value().integer_value
         self.M = self.get_parameter('M').get_parameter_value().integer_value
 
-        num_rows = (self.ylims[1] - self.ylims[0])/self.csize
-        num_cols = (self.xlims[1] - self.xlims[0])/self.csize
+        num_rows = 1 + (self.ylims[1] - self.ylims[0])/self.csize
+        num_cols = 1 + (self.xlims[1] - self.xlims[0])/self.csize
         self.K = int(num_cols*num_rows)   
 
         try:
@@ -63,12 +64,11 @@ class MAB_node(Node):
         '''
         self.G = nx.grid_2d_graph(int(num_rows), int(num_cols))
         for i in self.G:
-            loc = self.csize*np.asarray(i)
-            self.G.nodes[i]['arm'] = mobj.Arm(loc)
-            self.G.nodes[i]['id']  = loc
+            loc = np.asarray(i)
+            self.G.nodes[i]['arm'] = mobj.Arm(loc[0], loc[1])
+            self.G.nodes[i]['id']  = i
             self.G.nodes[i]['prev_node'] = self.G.nodes[i]
 
-        self.MAB = MAB(self.G, self.T, self.K, self.M, self.csize, self.xlims, self.ylims)
 
         '''
         Get Agent controlling information
@@ -83,29 +83,59 @@ class MAB_node(Node):
 
         self.get_logger().info(f"Initializing MAB Node with {self.T} time steps, {self.K} arms, and {self.M} agents")
 
-        self.robot_listeners = {namespace: robot_listener(self,namespace,self.pose_type_string, )\
-                         for namespace in self.neighborhood_namespaces}
+        self.agents = {}
 
-        self.robot_publishers = {namespace: robot_publisher(self,namespace, )\
-                         for namespace in self.neighborhood_namespaces}
+        for namespace in self.neighborhood_namespaces:
+            self.agents[namespace] = mobj.Agent(namespace, robot_listener(self,namespace,self.pose_type_string), robot_publisher(self,namespace), self.csize)
 
 
-        self.initialization_timer = 1e-1
+        self.initialization_timer_check = 1e-1
         
-        self.reward_collection_timer = self.create_timer(self.initialization_timer, self.initialization_callback)
+        self.initialization_timer = self.create_timer(self.initialization_timer_check, self.initialization_callback)
+
+        self.process_episode_timer_check = 1e-1
+
+        self.process_episode_timer = self.create_timer(self.process_episode_timer_check, self.episode_ucb_callback)
+
+
+        self.discrete_time = 0
+        self.started = False
+
+        self.MAB = MAB(self.G, self.T, self.K, self.M, self.csize, self.xlims, self.ylims, self.agents)
+
+
+
+    def episode_ucb_callback(self):
+        if not self.started:
+            return
+
+        self.discrete_time += 1
+        for namespace, agent in self.agents.items():
+            if not agent.listener.latest_episode_concluded():
+                return
+        
+        reward_packages = {}
+        for namespace, agent in self.agents.items():
+            reward_packages[namespace] = agent.listener.get_latest_episode_rewards()
+
+        self.MAB.process_episode_rewards(reward_packages, self.discrete_time)
+
+        
 
     def initialization_callback(self):
         if not self._ready():
             return
+
+        self.discrete_time = 0
+        self.started = True
 
         locs =  self._get_robot_locs()
         for robot, pos in locs.items():
             pos0 = self.MAB.compute_start_loc(pos)
             trajectory = self.MAB._initialize_trajectory(pos0)
             self.get_logger().info(f"Publishing trajectory for {robot} that starts at {pos0} but is currently at {pos}")
-            self.robot_publishers[robot].publish_trajectory(trajectory, 120.0)
-        
-        self.reward_collection_timer.destroy()
+            self.agents[robot].publisher.publish_trajectory(trajectory, 50.0)
+        self.initialization_timer.destroy()
 
     def _ready(self):
         locs =  self._get_robot_locs()
@@ -116,7 +146,7 @@ class MAB_node(Node):
 
 
     def _get_robot_locs(self):
-        return {namespace:listener.get_latest_loc() for namespace, listener in self.robot_listeners.items()}
+        return {namespace:agent.listener.get_latest_loc() for namespace, agent in self.agents.items()}
 
 def main(args=None):
     rclpy.init(args=args)

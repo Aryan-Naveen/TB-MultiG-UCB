@@ -20,7 +20,7 @@ from ucb_interfaces.action import UCBEpisode
 from geometry_msgs.msg import Pose
 
 
-from ucb_interfaces.msg import UCBTrajectory
+from ucb_interfaces.msg import UCBTrajectory, UCBAgentPackage, UCBPackageNode
 
 import numpy as np
 from geometry_msgs.msg import Pose
@@ -44,25 +44,36 @@ def xy2Pose(xy):
 class test(Node):
     def __init__(self,xlims=[-np.inf,np.inf],ylims = [-np.inf,np.inf], csize=0.2):
         super().__init__(node_name = 'UCB')
-        self.waypoints = np.array([[0, 0], [-csize, 0], [-2*csize, 0], [-3*csize, 0], [-4*csize, 0], [-5*csize, 0], [-6*csize, 0], [-6*csize, -1*csize], [-6*csize, -2*csize], [-6*csize, -3*csize]])
 
-        self.traj = xy2traj(self.waypoints)
 
         qos = QoSProfile(depth=10)
 
-        self._agent_publisher = self.create_publisher(UCBTrajectory, '/MobileSensor5/UCB_trajectory', qos)
-    
-    def send_goal(self):
-        self.traj.episode_duration = 30.0
-        self._agent_publisher.publish(self.traj)
+        self.pubs = {}
 
+        self.namespaces = ['MobileSensor5', 'MobileSensor4', 'MobileSensor3', 'MobileSensor2', 'MobileSensor1']
+        self.rewards = {}
+
+        nodes = [int(100*i + j) for i in range(6) for j in range(6)]
+        for namespace in self.namespaces:
+            self.pubs[namespace] = self.create_publisher(UCBAgentPackage, '/{}/UCB_rewards'.format(namespace), qos)
+            self.rewards[namespace] = UCBAgentPackage()
+            for i, node in enumerate(nodes):
+                reward = UCBPackageNode()
+                reward.id = node
+                reward.interval = [5*i, 5*i + 4]
+                reward.mean = 100.0
+                self.rewards[namespace].rewards.append(reward)
+
+    def send_rewards(self):
+        for namespace in self.namespaces:
+            self.pubs[namespace].publish(self.rewards[namespace])
     
 
 def main(args=None):
     rclpy.init(args=args)
 
     test_node = test()
-    test_node.send_goal()
+    test_node.send_rewards()
     rclpy.shutdown()
 
 if __name__ == '__main__':
